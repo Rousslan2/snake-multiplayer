@@ -1,86 +1,119 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Snake Multiplayer</title>
-  <link rel="stylesheet" href="style.css" />
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Snake.io Multiplayer</title>
+  <link rel="stylesheet" href="style.css"/>
 </head>
 <body>
 
-  <!-- ── LOBBY ────────────────────────────────────────────────────── -->
-  <div id="lobby">
-    <div class="lobby-card">
-      <div class="logo">
-        <span class="logo-snake">🐍</span>
-        <span class="logo-text">SNAKE<span class="logo-io">.io</span></span>
-      </div>
-      <p class="lobby-sub">Multijoueur en temps réel</p>
-      <input id="nameInput" type="text" maxlength="16" placeholder="Ton pseudo..." autocomplete="off" />
-      <button id="playBtn">JOUER</button>
-      <div id="onlineCount" class="online-pill">⚡ 0 joueur en ligne</div>
+<!-- ═══════════════════════════ LOBBY ═══════════════════════════ -->
+<div id="lobby">
+  <div class="lobby-card">
+    <div class="logo">
+      <span class="logo-snake">🐍</span>
+      <span class="logo-text">SNAKE<span class="logo-io">.io</span></span>
     </div>
-    <div class="lobby-rules">
-      <h3>Comment jouer</h3>
-      <ul>
-        <li>🍎 Mange les pommes rouges <strong>+1 pt</strong></li>
-        <li>⭐ Pomme dorée <strong>+3 pts</strong></li>
-        <li>☠️ Évite les serpents et toi-même</li>
-        <li>🏆 Le plus gros score gagne</li>
-      </ul>
+    <p class="lobby-sub">Multijoueur en temps réel</p>
+
+    <input id="nameInput" type="text" maxlength="16"
+           placeholder="Ton pseudo..." autocomplete="off"/>
+
+    <!-- Skin picker -->
+    <div class="skin-section">
+      <div class="skin-label">CHOISIS TON SKIN</div>
+      <div id="skinPicker" class="skin-picker"></div>
+    </div>
+
+    <button id="playBtn">JOUER ▶</button>
+    <div id="onlineCount" class="online-pill">⚡ 0 joueur en ligne</div>
+  </div>
+
+  <div class="lobby-rules">
+    <h3>COMMENT JOUER</h3>
+    <ul>
+      <li>🍎 Pomme rouge → <strong>+1 pt</strong></li>
+      <li>⭐ Pomme dorée → <strong>+3 pts</strong></li>
+      <li>⚡ Éclair → <strong>Vitesse boost 6s</strong></li>
+      <li>🛡️ Bouclier → <strong>Survie 1 collision</strong></li>
+      <li>🚀 <kbd>ESPACE</kbd> → Foncer (raccourcit ta queue)</li>
+      <li>☠️ Évite les autres serpents et toi-même</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ═══════════════════════════ GAME ════════════════════════════ -->
+<div id="gameUI" style="display:none">
+
+  <!-- Sidebar -->
+  <div id="sidebar">
+
+    <div class="side-card" id="myCard">
+      <div class="label">MON SCORE</div>
+      <div id="myScore">0</div>
+      <div id="myName" class="my-name"></div>
+      <div class="my-color-bar" id="myColorBar"></div>
+      <div id="myKills" class="kills-badge">☠️ <span id="killCount">0</span> kills</div>
+    </div>
+
+    <div class="side-card" id="effectsCard">
+      <div class="label">EFFETS</div>
+      <div id="effectsList" class="effects-list"></div>
+    </div>
+
+    <div class="side-card" id="lbCard">
+      <div class="label">CLASSEMENT</div>
+      <div id="lbList"></div>
+    </div>
+
+    <div class="side-card" id="controlsCard">
+      <div class="label">CONTRÔLES</div>
+      <div class="ctrl-grid">
+        <div></div><div class="kbd">↑</div><div></div>
+        <div class="kbd">←</div><div class="kbd">↓</div><div class="kbd">→</div>
+        <div class="ctrl-or">ou</div><div></div><div></div>
+        <div></div><div class="kbd">W</div><div></div>
+        <div class="kbd">A</div><div class="kbd">S</div><div class="kbd">D</div>
+      </div>
+      <div class="boost-hint">🚀 <kbd>ESPACE</kbd> = Boost</div>
+      <p class="ctrl-hint">Mobile : swipe sur le canvas</p>
+    </div>
+
+  </div>
+
+  <!-- Arena -->
+  <div id="arena">
+    <div id="topBar">
+      <span id="pingLabel">● LIVE</span>
+      <div id="killFeed"></div>
+      <span id="countLabel">0 joueurs</span>
+    </div>
+    <div id="canvasWrap">
+      <canvas id="canvas"></canvas>
+
+      <!-- Boost bar overlay -->
+      <div id="boostBar" class="boost-bar-wrap" style="display:none">
+        <div id="boostFill" class="boost-fill"></div>
+        <span class="boost-label">🚀 BOOST</span>
+      </div>
+
+      <!-- Death overlay -->
+      <div id="overlay" style="display:none">
+        <div class="overlay-box">
+          <div class="overlay-title">💀 MORT</div>
+          <div id="overlayScore"></div>
+          <div id="overlayKills"></div>
+          <button id="respawnBtn">↩ RÉAPPARAÎTRE</button>
+          <button id="quitBtn">🏠 ACCUEIL</button>
+        </div>
+      </div>
     </div>
   </div>
 
-  <!-- ── GAME ─────────────────────────────────────────────────────── -->
-  <div id="gameUI" style="display:none">
+</div>
 
-    <div id="sidebar">
-      <div class="side-card" id="myCard">
-        <div class="label">MON SCORE</div>
-        <div id="myScore">0</div>
-        <div id="myName" class="my-name"></div>
-        <div class="my-color-bar" id="myColorBar"></div>
-      </div>
-
-      <div class="side-card" id="lbCard">
-        <div class="label">CLASSEMENT</div>
-        <div id="lbList"></div>
-      </div>
-
-      <div class="side-card" id="controlsCard">
-        <div class="label">CONTRÔLES</div>
-        <div class="ctrl-grid">
-          <div></div><div class="kbd">↑</div><div></div>
-          <div class="kbd">←</div><div class="kbd">↓</div><div class="kbd">→</div>
-          <div class="ctrl-or">ou</div><div></div><div></div>
-          <div></div><div class="kbd">W</div><div></div>
-          <div class="kbd">A</div><div class="kbd">S</div><div class="kbd">D</div>
-        </div>
-        <p class="ctrl-hint">Mobile : swipe sur le canvas</p>
-      </div>
-    </div>
-
-    <div id="arena">
-      <div id="topBar">
-        <span id="pingLabel">● LIVE</span>
-        <span id="countLabel">0 joueurs</span>
-      </div>
-      <div id="canvasWrap">
-        <canvas id="canvas"></canvas>
-        <div id="overlay" style="display:none">
-          <div class="overlay-box">
-            <div class="overlay-title">💀 MORT</div>
-            <div id="overlayScore"></div>
-            <button id="respawnBtn">↩ RÉAPPARAÎTRE</button>
-            <button id="quitBtn">🏠 ACCUEIL</button>
-          </div>
-        </div>
-      </div>
-    </div>
-
-  </div>
-
-  <script src="/socket.io/socket.io.js"></script>
-  <script src="game.js"></script>
+<script src="/socket.io/socket.io.js"></script>
+<script src="game.js"></script>
 </body>
 </html>
